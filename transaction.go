@@ -410,9 +410,17 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	var lookupsWritableKeys []PublicKey
 	var lookupsReadOnlyKeys []PublicKey
 	if len(lookupsMap) > 0 {
+		lookupsKeys := make([]PublicKey, 0, len(lookupsMap))
+		for tablePubKey, _ := range lookupsMap {
+			lookupsKeys = append(lookupsKeys, tablePubKey)
+		}
+		sort.Slice(lookupsKeys, func(i, j int) bool {
+			return bytes.Compare(lookupsKeys[i][:], lookupsKeys[j][:]) < 0
+		})
 		lookups := make([]MessageAddressTableLookup, 0, len(lookupsMap))
 
-		for tablePubKey, l := range lookupsMap {
+		for _, tablePubKey := range lookupsKeys {
+			l := lookupsMap[tablePubKey]
 			lookupsWritableKeys = append(lookupsWritableKeys, l.Writable...)
 			lookupsReadOnlyKeys = append(lookupsReadOnlyKeys, l.Readonly...)
 
