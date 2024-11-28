@@ -414,7 +414,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 		for tablePubKey, _ := range lookupsMap {
 			lookupsKeys = append(lookupsKeys, tablePubKey)
 		}
-		sort.Slice(lookupsKeys, func(i, j int) bool {
+		sort.SliceStable(lookupsKeys, func(i, j int) bool {
 			return bytes.Compare(lookupsKeys[i][:], lookupsKeys[j][:]) < 0
 		})
 		lookups := make([]MessageAddressTableLookup, 0, len(lookupsMap))
@@ -430,6 +430,13 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 				ReadonlyIndexes: l.ReadonlyIndexes,
 			})
 		}
+
+		sort.SliceStable(lookupsWritableKeys, func(i, j int) bool {
+			return bytes.Compare(lookupsWritableKeys[i][:], lookupsWritableKeys[j][:]) < 0
+		})
+		sort.SliceStable(lookupsReadOnlyKeys, func(i, j int) bool {
+			return bytes.Compare(lookupsReadOnlyKeys[i][:], lookupsReadOnlyKeys[j][:]) < 0
+		})
 
 		// prevent error created in ResolveLookups
 		err := message.SetAddressTables(options.addressTables)
